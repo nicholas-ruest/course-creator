@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COURSE_TITLE}} | Agentics Foundation</title>
+<meta name="generator" content="Agentics Course Builder">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E25C3D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='24' height='24' fill='%231A1A1A'/%3E%3Cpath d='M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   AGENTICS FOUNDATION — Course Shell
+   Brand: Warm cream + coral (#E25C3D) + IBM Plex Mono
+   Layout: 3-pane (lecturer | content | quiz sidebar)
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand ── */
+  --primary: #E25C3D;
+  --primary-dim: rgba(226, 92, 61, 0.12);
+  --primary-glow: rgba(226, 92, 61, 0.4);
+  --primary-hover: #d64a2c;
+  --primary-light: #FF8F6B;
+  --primary-bg: rgba(226, 92, 61, 0.06);
+
+  /* ── Background ── */
+  --bg: #FAF9F6;
+  --bg-card: #FFFFFF;
+  --bg-muted: hsl(40 7% 88%);
+  --bg-console: hsl(40 28% 95%);
+  --bg-code: #1a1a1a;
+
+  /* ── Text ── */
+  --text: hsl(0 0% 12%);
+  --text-dim: hsl(40 7% 42%);
+  --text-bright: hsl(0 0% 5%);
+  --text-on-primary: #FFFFFF;
+  --text-code: #e0e0e0;
+
+  /* ── Accents ── */
+  --teal: hsl(174 60% 51%);
+  --amber: hsl(43 100% 64%);
+  --red: hsl(0 100% 63%);
+  --green: rgb(34 197 94);
+  --blue: rgb(59 130 246);
+
+  /* ── Borders & Shape ── */
+  --border: hsl(40 7% 88%);
+  --border-active: rgba(226, 92, 61, 0.35);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 9999px;
+
+  /* ── Type ── */
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+  --shadow-glass: inset 0 2px 4px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* ── Dark mode ── */
+:root.dark {
+  --bg: hsl(0 0% 5%); --bg-card: hsl(0 0% 8%); --bg-muted: hsl(0 0% 13%);
+  --bg-console: hsl(0 0% 10%); --text: hsl(0 0% 93%); --text-dim: hsl(0 0% 60%);
+  --text-bright: hsl(0 0% 98%); --border: hsl(0 0% 13%); --primary: hsl(11 100% 64%);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2 { font-family: var(--font-mono); color: var(--text-bright); font-weight: 700; line-height: 1.2; }
+h3 { font-family: var(--font-display); font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.02em; }
+h4 { font-family: var(--font-mono); font-weight: 600; color: var(--text-bright); }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: var(--text-bright); }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--primary-dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-glow); }
+
+/* ═══ LAYOUT: 3-Pane Grid ═══ */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  background: rgba(250, 249, 246, 0.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; gap: 16px;
+  z-index: 100; box-shadow: var(--shadow-sm);
+}
+.dark .topnav { background: rgba(13, 13, 13, 0.92); }
+
+.topnav .logo { display: flex; align-items: center; gap: 8px; }
+.topnav .logo svg { flex-shrink: 0; }
+.topnav .logo-text {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.topnav .course-title {
+  font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-bright);
+  font-weight: 500; margin-left: 8px; padding-left: 16px;
+  border-left: 1px solid var(--border);
+}
+.topnav .nav-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+#glossary-btn {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
+  color: var(--text-dim); background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 6px 14px; cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+#glossary-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+.course-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 280px;
+  height: calc(100vh - 56px);
+  margin-top: 56px;
+  overflow: hidden;
+}
+
+/* ═══ LEFT: Lecturer Pane ═══ */
+.lecturer {
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 24px 16px;
+  position: relative;
+}
+.lecturer-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--primary-dim); border: 2px solid var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin: 0 auto 12px;
+}
+.lecturer-name {
+  text-align: center; font-family: var(--font-mono); font-size: 0.82rem;
+  font-weight: 600; color: var(--primary); margin-bottom: 2px;
+}
+.lecturer-role {
+  text-align: center; font-size: 0.72rem; color: var(--text-dim); margin-bottom: 20px;
+}
+.lecturer-nav { list-style: none; margin: 0 0 20px; }
+.lecturer-nav li {
+  padding: 8px 12px; font-size: 0.82rem; color: var(--text-dim);
+  border-left: 2px solid transparent; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s; border-radius: 0 4px 4px 0;
+}
+.lecturer-nav li:hover { color: var(--text); background: var(--primary-dim); }
+.lecturer-nav li.active {
+  color: var(--primary); border-left-color: var(--primary); font-weight: 500;
+  background: var(--primary-dim);
+}
+.lecturer-dialogue {
+  font-size: 0.88rem; color: var(--text); line-height: 1.7;
+  padding: 16px; background: var(--bg-console); border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.lecturer-dialogue p { margin-bottom: 10px; }
+.lecturer-dialogue p:last-child { margin-bottom: 0; }
+.progress-bar {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--border);
+}
+.progress-fill { width: 100%; background: var(--primary); transition: height 0.3s; }
+
+/* ═══ CENTER: Content Pane ═══ */
+.content {
+  overflow-y: auto; padding: 40px 48px 100px;
+  scroll-behavior: smooth;
+}
+
+/* ── Sections ── */
+.section {
+  padding: 48px 0; opacity: 0; transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.section.visible { opacity: 1; transform: translateY(0); }
+
+.section-label {
+  font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--primary); margin-bottom: 8px;
+}
+.section h2 {
+  font-size: clamp(1.4rem, 3vw, 1.8rem); margin-bottom: 16px;
+}
+.section p {
+  font-size: 1rem; margin-bottom: 16px; max-width: 680px;
+}
+
+/* ── Vernacular (terminology — MANDATORY) ── */
+.vernacular {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-left: 4px solid var(--amber); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 16px 20px; margin: 24px 0; box-shadow: var(--shadow-sm);
+}
+.vernacular-header {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--amber);
+  margin-bottom: 10px;
+}
+.vernacular dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+.vernacular dt {
+  font-family: var(--font-mono); font-weight: 600; font-size: 0.9rem;
+  color: var(--primary);
+}
+.vernacular dd { font-size: 0.9rem; color: var(--text); margin: 0; line-height: 1.5; }
+
+/* ── Inline term tooltips ── */
+.term {
+  color: var(--primary); border-bottom: 1px dashed var(--primary);
+  cursor: help; position: relative; font-weight: 500;
+}
+.term:hover { color: var(--text-bright); }
+.term-tooltip {
+  display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); background: var(--bg-card); border: 1px solid var(--primary);
+  border-radius: var(--radius-sm); padding: 12px 16px; width: 280px; z-index: 200;
+  font-size: 0.85rem; font-weight: 400; color: var(--text);
+  box-shadow: var(--shadow-lg); pointer-events: none;
+}
+.term-tooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: var(--primary);
+}
+.term:hover .term-tooltip, .term:focus .term-tooltip { display: block; }
+.term-tooltip .term-name {
+  font-family: var(--font-mono); font-weight: 600; color: var(--primary);
+  font-size: 0.88rem; margin-bottom: 4px;
+}
+.term-tooltip .term-category {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-dim); margin-bottom: 6px;
+}
+
+/* ── Analogy box ── */
+.analogy {
+  background: linear-gradient(135deg, var(--primary-dim), rgba(255, 143, 107, 0.08));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 24px; margin: 24px 0; position: relative;
+}
+.analogy::before {
+  content: 'ANALOGY'; font-family: var(--font-mono); font-size: 0.72rem;
+  letter-spacing: 0.15em; color: var(--primary); position: absolute;
+  top: -0.5rem; left: 1.25rem; background: var(--bg); padding: 0 0.5rem;
+}
+.analogy p { font-size: 0.95rem; font-style: italic; margin: 0; }
+
+/* ── Key insight ── */
+.key-insight {
+  background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.2);
+  border-left: 4px solid var(--green); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 16px 20px; margin: 24px 0;
+}
+.key-insight-header {
+  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--green); margin-bottom: 6px;
+}
+.key-insight p { margin: 0; font-size: 0.92rem; }
+
+/* ── VS comparison box ── */
+.vs-box { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 24px 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.vs-box .vs-col { padding: 16px 20px; }
+.vs-box .vs-col:first-child { background: rgba(239, 68, 68, 0.04); border-right: 1px solid var(--border); }
+.vs-box .vs-col:last-child { background: rgba(34, 197, 94, 0.04); }
+.vs-box .vs-label { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.vs-box .vs-col:first-child .vs-label { color: var(--red); }
+.vs-box .vs-col:last-child .vs-label { color: var(--green); }
+
+/* ── Code block ── */
+.code-block {
+  background: var(--bg-code); border: 1px solid hsl(0 0% 20%); border-radius: var(--radius-sm);
+  padding: 16px 20px; margin: 24px 0; overflow-x: auto; position: relative;
+}
+.code-block .lang-tag {
+  position: absolute; top: 8px; right: 12px; font-family: var(--font-mono);
+  font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: hsl(0 0% 50%); background: hsl(0 0% 14%); padding: 2px 8px;
+  border-radius: 4px;
+}
+.code-block pre {
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6;
+  color: var(--text-code); white-space: pre; margin: 0;
+}
+.code-block .kw { color: #ff7b72; }
+.code-block .fn { color: #79c0ff; }
+.code-block .str { color: #a5d6ff; }
+.code-block .num { color: #ffa657; }
+.code-block .cm { color: hsl(0 0% 45%); font-style: italic; }
+
+/* ── Demo container (console window motif) ── */
+.demo-container {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  margin: 24px 0; box-shadow: var(--shadow);
+}
+.demo-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; background: var(--bg-console);
+  border-bottom: 1px solid var(--border);
+}
+.demo-header .dots { display: flex; gap: 6px; }
+.demo-header .dots span { width: 10px; height: 10px; border-radius: 50%; }
+.demo-header .dots span:nth-child(1) { background: var(--red); }
+.demo-header .dots span:nth-child(2) { background: var(--amber); }
+.demo-header .dots span:nth-child(3) { background: var(--teal); }
+.demo-header .demo-title {
+  font-family: var(--font-mono); font-size: 0.82rem; font-weight: 500;
+  color: var(--text-dim); flex: 1;
+}
+.demo-body { padding: 20px; min-height: 200px; }
+.demo-body canvas { display: block; max-width: 100%; border-radius: var(--radius-sm); }
+.demo-controls { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.print-fallback { display: none; font-style: italic; color: var(--text-dim); }
+
+/* ── Compare table ── */
+.compare-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.88rem; }
+.compare-table th {
+  font-family: var(--font-mono); text-align: left; padding: 10px 14px;
+  border-bottom: 2px solid var(--border); color: var(--primary);
+  font-weight: 600; font-size: 0.78rem; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.compare-table td { padding: 8px 14px; border-bottom: 1px solid var(--border); }
+.compare-table tr:hover td { background: var(--primary-dim); }
+
+/* ── Callout ── */
+.callout {
+  background: var(--primary-bg); border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 16px 20px; margin: 24px 0;
+}
+.callout strong { color: var(--primary); }
+
+/* ═══ RIGHT: Quiz Sidebar ═══ */
+.sidebar {
+  background: var(--bg-card); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto; padding: 16px;
+}
+.sidebar-header {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary);
+  margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+
+.quiz-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px;
+}
+.quiz-question {
+  font-size: 0.9rem; font-weight: 500; color: var(--text-bright); margin-bottom: 12px;
+}
+.quiz-option {
+  display: block; width: 100%; padding: 10px 14px; margin: 6px 0;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 0.85rem;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  text-align: left; font-family: var(--font-sans);
+}
+.quiz-option:hover { border-color: var(--primary); background: var(--primary-dim); }
+.quiz-option.correct { border-color: var(--green); background: rgba(34, 197, 94, 0.08); }
+.quiz-option.incorrect { border-color: var(--red); background: rgba(239, 68, 68, 0.08); }
+.quiz-explanation {
+  font-size: 0.82rem; color: var(--text-dim); padding: 10px 14px;
+  border-top: 1px solid var(--border); margin-top: 10px; display: none;
+}
+.quiz-explanation.visible { display: block; }
+
+.quiz-score {
+  text-align: center; padding: 16px; border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.quiz-score .score-value {
+  font-size: 1.8rem; font-weight: 700; color: var(--primary);
+  font-family: var(--font-mono);
+}
+.quiz-score .score-label {
+  font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ═══ Glossary Overlay ═══ */
+.glossary-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.5); z-index: 300;
+  justify-content: center; align-items: flex-start;
+  padding: 80px 20px; overflow-y: auto;
+}
+.glossary-overlay.open { display: flex; }
+.glossary-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); max-width: 720px; width: 100%;
+  padding: 32px; box-shadow: var(--shadow-lg);
+}
+.glossary-search {
+  width: 100%; padding: 10px 16px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); font-family: var(--font-sans);
+  font-size: 0.9rem; margin-bottom: 20px;
+}
+.glossary-search:focus { border-color: var(--primary); outline: none; }
+.glossary-category {
+  font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--primary); margin: 20px 0 8px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+.glossary-entry {
+  display: flex; gap: 12px; padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04); font-size: 0.88rem;
+}
+.glossary-entry .g-term {
+  font-family: var(--font-mono); font-weight: 600; color: var(--primary);
+  min-width: 140px; flex-shrink: 0;
+}
+.glossary-entry .g-def { color: var(--text); }
+.glossary-entry .g-section {
+  font-size: 0.72rem; color: var(--text-dim); margin-left: auto;
+  cursor: pointer; white-space: nowrap;
+}
+.glossary-entry .g-section:hover { color: var(--primary); text-decoration: underline; }
+
+/* ═══ Responsive ═══ */
+@media (max-width: 1024px) {
+  .course-layout { grid-template-columns: 1fr 280px; }
+  .lecturer {
+    position: fixed; left: -260px; top: 56px; bottom: 0; width: 260px;
+    z-index: 50; transition: left 0.3s; box-shadow: var(--shadow-lg);
+  }
+  .lecturer.open { left: 0; }
+}
+@media (max-width: 640px) {
+  .course-layout { grid-template-columns: 1fr; }
+  .content { padding: 24px 20px 80px; }
+  .sidebar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 50vh; transform: translateY(calc(100% - 48px));
+    transition: transform 0.3s; z-index: 50;
+    border-top: 1px solid var(--border); border-left: none;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  }
+  .sidebar.open { transform: translateY(0); }
+  .vs-box { grid-template-columns: 1fr; }
+}
+@media print {
+  .topnav, .lecturer, .sidebar, .glossary-overlay { display: none !important; }
+  .course-layout { display: block; height: auto; }
+  .content { overflow: visible; padding: 20px; max-width: 100%; }
+  .demo-container canvas { display: none; }
+  .print-fallback { display: block !important; }
+  .section { opacity: 1 !important; transform: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="topnav">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>
+    </svg>
+    <span class="logo-text">Agentics</span>
+  </div>
+  <span class="course-title">{{COURSE_TITLE}}</span>
+  <div class="nav-actions">
+    <button id="glossary-btn">Glossary</button>
+  </div>
+</nav>
+
+<!-- ═══ 3-PANE LAYOUT ═══ -->
+<div class="course-layout">
+
+  <!-- LEFT: Lecturer -->
+  <aside class="lecturer">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="height:0%"></div></div>
+    <div class="lecturer-avatar">{{AVATAR_EMOJI}}</div>
+    <div class="lecturer-name">{{INSTRUCTOR_NAME}}</div>
+    <div class="lecturer-role">Course Instructor</div>
+    <ul class="lecturer-nav" id="lecturer-nav">
+      <!-- Generated: <li data-section="s1" class="active">1. Section Title</li> -->
+    </ul>
+    <div class="lecturer-dialogue" id="lecturer-dialogue">
+      <!-- Updated dynamically as sections scroll into view -->
+    </div>
+  </aside>
+
+  <!-- CENTER: Content -->
+  <main class="content" id="content">
+    <!-- Generated sections go here. Each section:
+    <div class="section" data-section="s1">
+      <div class="section-label">01 — Section Title</div>
+      <h2>Section Title</h2>
+      <p>Explanation...</p>
+      <div class="analogy"><p>Analogy text...</p></div>
+      <div class="demo-container">
+        <div class="demo-header">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span class="demo-title">Demo Name</span>
+        </div>
+        <div class="demo-body"><canvas id="viz-s1" width="600" height="300"></canvas></div>
+      </div>
+      <div class="code-block">
+        <span class="lang-tag">javascript</span>
+        <pre>// code here</pre>
+      </div>
+      <div class="vernacular">
+        <div class="vernacular-header">Terminology</div>
+        <dl><dt>Term</dt><dd>Definition</dd></dl>
+      </div>
+      <div class="key-insight">
+        <div class="key-insight-header">Key Insight</div>
+        <p>Insight text...</p>
+      </div>
+    </div>
+    -->
+
+    <!-- Final section: Citations -->
+    <div class="section" data-section="citations">
+      <div class="section-label">References</div>
+      <h2>Citations & Sources</h2>
+      <ol id="citation-list" style="font-size:0.88rem;padding-left:20px;"></ol>
+    </div>
+  </main>
+
+  <!-- RIGHT: Quiz Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">Knowledge Check</div>
+    <div id="quiz-container">
+      <!-- Quizzes rendered dynamically per section -->
+    </div>
+    <div class="quiz-score">
+      <div class="score-value" id="score-value">0 / 0</div>
+      <div class="score-label">Score</div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ═══ Glossary Overlay ═══ -->
+<div id="glossary-overlay" class="glossary-overlay">
+  <div class="glossary-panel">
+    <h2 style="font-family:var(--font-mono);color:var(--primary);margin-bottom:16px;font-size:1.2rem;">Glossary</h2>
+    <input id="glossary-search" class="glossary-search" type="text" placeholder="Search terms...">
+    <div id="glossary-list"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   COURSE ENGINE — Replace COURSE_DATA with generated content
+   ═══════════════════════════════════════════════════════════════ */
+
+const COURSE_DATA = {{COURSE_DATA_JSON}};
+
+// ── State ──
+const STORAGE_KEY = 'course-' + COURSE_DATA.meta.topic;
+let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"answers":{},"score":0}');
+const contentEl = document.getElementById('content');
+
+// ── Section tracking via IntersectionObserver ──
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) activateSection(entry.target.dataset.section);
+  });
+}, { threshold: 0.3, root: contentEl });
+document.querySelectorAll('.section[data-section^="s"]').forEach(s => sectionObserver.observe(s));
+
+function activateSection(sid) {
+  const section = COURSE_DATA.sections.find(s => s.id === sid);
+  if (!section) return;
+  document.getElementById('lecturer-dialogue').innerHTML = section.lectureScript;
+  document.querySelectorAll('.lecturer-nav li').forEach(li =>
+    li.classList.toggle('active', li.dataset.section === sid));
+  renderQuiz(section.assessments, sid);
+  const idx = COURSE_DATA.sections.findIndex(s => s.id === sid);
+  document.getElementById('progress-fill').style.height =
+    ((idx + 1) / COURSE_DATA.sections.length * 100) + '%';
+}
+
+// ── Quiz rendering ──
+function renderQuiz(assessments, sid) {
+  const c = document.getElementById('quiz-container');
+  if (!assessments || !assessments.length) { c.innerHTML = '<p style="color:var(--text-dim);font-size:0.85rem;padding:8px;">No quiz for this section.</p>'; return; }
+  c.innerHTML = assessments.map((q, qi) => {
+    const qid = sid + '-q' + qi;
+    const answered = progress.answers[qid] !== undefined;
+    if (q.type === 'multiple-choice') return renderMC(q, qid, answered);
+    if (q.type === 'code-completion') return renderCode(q, qid, answered);
+    return '';
+  }).join('');
+  updateScore();
+}
+
+function renderMC(q, qid, answered) {
+  const prev = progress.answers[qid];
+  return '<div class="quiz-card"><div class="quiz-question">' + q.question + '</div>' +
+    q.options.map((opt, i) => {
+      let cls = 'quiz-option';
+      if (answered) { if (i === q.correct) cls += ' correct'; else if (i === prev) cls += ' incorrect'; }
+      return '<button class="' + cls + '" ' + (answered ? 'disabled' : '') +
+        ' onclick="answerMC(\'' + qid + '\',' + i + ',' + q.correct + ')">' + opt + '</button>';
+    }).join('') +
+    '<div class="quiz-explanation' + (answered ? ' visible' : '') + '">' + q.explanation + '</div></div>';
+}
+
+function renderCode(q, qid, answered) {
+  return '<div class="quiz-card"><div class="quiz-question">' + q.prompt + '</div>' +
+    '<textarea style="width:100%;font-family:var(--font-mono);font-size:0.82rem;background:var(--bg-code);color:var(--text-code);border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical;" rows="4"' +
+    (answered ? ' disabled' : '') + '>' + (answered ? q.solution : q.starterCode) + '</textarea></div>';
+}
+
+function answerMC(qid, idx, correct) {
+  progress.answers[qid] = idx;
+  if (idx === correct) progress.score++;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  const sid = document.querySelector('.lecturer-nav li.active')?.dataset.section;
+  if (sid) { const sec = COURSE_DATA.sections.find(s => s.id === sid); if (sec) renderQuiz(sec.assessments, sid); }
+}
+
+function updateScore() {
+  const el = document.getElementById('score-value');
+  if (el) el.textContent = progress.score + ' / ' + COURSE_DATA.meta.totalQuestions;
+}
+
+// ── Nav clicks ──
+document.querySelectorAll('.lecturer-nav li').forEach(li => {
+  li.addEventListener('click', () => {
+    const t = document.querySelector('.section[data-section="' + li.dataset.section + '"]');
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// ── Scroll reveal ──
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, root: contentEl });
+document.querySelectorAll('.section').forEach(s => revealObs.observe(s));
+
+// ── Glossary ──
+const glossaryOverlay = document.getElementById('glossary-overlay');
+document.getElementById('glossary-btn')?.addEventListener('click', () => {
+  glossaryOverlay.classList.toggle('open');
+  if (glossaryOverlay.classList.contains('open')) document.getElementById('glossary-search')?.focus();
+});
+glossaryOverlay?.addEventListener('click', e => { if (e.target === glossaryOverlay) glossaryOverlay.classList.remove('open'); });
+
+function renderGlossary(filter) {
+  const terms = (COURSE_DATA.glossary || [])
+    .filter(t => !filter || t.term.toLowerCase().includes(filter) || t.definition.toLowerCase().includes(filter))
+    .sort((a, b) => a.term.localeCompare(b.term));
+  const byCategory = {};
+  terms.forEach(t => (byCategory[t.category] = byCategory[t.category] || []).push(t));
+  document.getElementById('glossary-list').innerHTML = Object.entries(byCategory)
+    .sort(([a],[b]) => a.localeCompare(b))
+    .map(([cat, items]) =>
+      '<div class="glossary-category">' + cat + '</div>' +
+      items.map(t =>
+        '<div class="glossary-entry"><span class="g-term">' + t.term +
+        '</span><span class="g-def">' + t.definition +
+        '</span><span class="g-section" onclick="jumpTo(\'' + t.firstIntroduced + '\')">' +
+        t.firstIntroduced + '</span></div>'
+      ).join('')
+    ).join('');
+}
+document.getElementById('glossary-search')?.addEventListener('input', e => renderGlossary(e.target.value.toLowerCase()));
+function jumpTo(sid) {
+  glossaryOverlay.classList.remove('open');
+  document.querySelector('.section[data-section="' + sid + '"]')?.scrollIntoView({ behavior: 'smooth' });
+}
+if (COURSE_DATA.glossary) renderGlossary('');
+
+// ── Citations ──
+if (COURSE_DATA.citations?.length) {
+  document.getElementById('citation-list').innerHTML = COURSE_DATA.citations
+    .map((c, i) => '<li id="cite-' + c.id + '"><a href="' + c.url + '" target="_blank">' + c.title + '</a> — ' + c.relevance + ' <small>(accessed ' + c.accessed + ')</small></li>')
+    .join('');
+}
+
+// ── HiDPI Canvas helper ──
+function hiDPI(canvas) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  return { ctx, w: rect.width, h: rect.height };
+}
+
+// ── Responsive toggles ──
+document.querySelector('.lecturer-toggle')?.addEventListener('click', () => document.querySelector('.lecturer').classList.toggle('open'));
+document.querySelector('.sidebar-toggle')?.addEventListener('click', () => document.querySelector('.sidebar').classList.toggle('open'));
+
+// ── Initialize first section ──
+if (COURSE_DATA.sections.length) activateSection(COURSE_DATA.sections[0].id);
+</script>
+</body>
+</html>

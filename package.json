@@ -1,0 +1,20 @@
+{
+  "name": "course-creator",
+  "version": "1.0.0",
+  "description": "Generate comprehensive interactive HTML courses from GitHub repos, URLs, and packages with HeyGen talking-head instructors",
+  "type": "module",
+  "bin": {
+    "course-creator": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^4.1.4"
+  }
+}

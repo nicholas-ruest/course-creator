@@ -1,0 +1,4 @@
+node_modules/
+courses/
+.course-creator-cache/
+.env
