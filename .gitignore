@@ -2,3 +2,5 @@ node_modules/
 courses/
 .course-creator-cache/
 .env
+course-skill.zip
+course/
