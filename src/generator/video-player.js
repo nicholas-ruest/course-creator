@@ -135,17 +135,24 @@ function loadSectionVideo(sid) {
 
   // Load video if available
   if (section.videoUrl && videoEl) {
-    videoSource.src = section.videoUrl;
-    videoEl.poster = section.videoPoster || '';
+    // Set src directly on the video element (not the <source> child).
+    // Data-URI blobs do not reliably reload via <source> across browsers.
+    videoEl.pause();
+    videoEl.removeAttribute('poster');
+    videoEl.src = section.videoUrl;
+    if (section.videoPoster) videoEl.poster = section.videoPoster;
     videoEl.load();
     videoEl.style.display = 'block';
     if (fallbackEl) fallbackEl.style.display = 'none';
 
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      videoEl.play().catch(function() {});
-    }
+    videoEl.oncanplay = function() {
+      videoEl.oncanplay = null;
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        videoEl.play().catch(function() {});
+      }
+    };
   } else {
-    if (videoEl) videoEl.style.display = 'none';
+    if (videoEl) { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.style.display = 'none'; }
     if (fallbackEl) fallbackEl.style.display = 'block';
   }
 }

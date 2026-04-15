@@ -383,6 +383,17 @@ strong { color: var(--text-bright); }
   border-top: 1px solid var(--border); margin-top: 10px; display: none;
 }
 .quiz-explanation.visible { display: block; }
+.quiz-next-btn {
+  display: block; width: 100%; padding: 10px 14px; margin-top: 12px;
+  background: var(--primary); color: #fff; border: none; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  font-family: var(--font-sans); transition: opacity 0.2s;
+}
+.quiz-next-btn:hover { opacity: 0.85; }
+.quiz-progress-indicator {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);
+  text-align: center; margin-bottom: 10px;
+}
 
 .quiz-score {
   text-align: center; padding: 16px; border-top: 1px solid var(--border);
@@ -596,18 +607,61 @@ function activateSection(sid) {
     ((idx + 1) / COURSE_DATA.sections.length * 100) + '%';
 }
 
-// ── Quiz rendering ──
+// ── Quiz rendering (one question at a time with Next button) ──
+var quizState = { sid: null, index: 0, assessments: [] };
+
 function renderQuiz(assessments, sid) {
   const c = document.getElementById('quiz-container');
   if (!assessments || !assessments.length) { c.innerHTML = '<p style="color:var(--text-dim);font-size:0.85rem;padding:8px;">No quiz for this section.</p>'; return; }
-  c.innerHTML = assessments.map((q, qi) => {
-    const qid = sid + '-q' + qi;
-    const answered = progress.answers[qid] !== undefined;
-    if (q.type === 'multiple-choice') return renderMC(q, qid, answered);
-    if (q.type === 'code-completion') return renderCode(q, qid, answered);
-    return '';
-  }).join('');
+
+  // Reset to first unanswered question when switching sections
+  if (quizState.sid !== sid) {
+    quizState.sid = sid;
+    quizState.assessments = assessments;
+    // Find first unanswered question, or show last if all answered
+    quizState.index = 0;
+    for (let i = 0; i < assessments.length; i++) {
+      const qid = sid + '-q' + i;
+      if (progress.answers[qid] === undefined) { quizState.index = i; break; }
+      if (i === assessments.length - 1) quizState.index = i;
+    }
+  }
+
+  showQuestion(c);
+}
+
+function showQuestion(container) {
+  const { sid, index, assessments } = quizState;
+  if (!assessments.length) return;
+  const q = assessments[index];
+  const qid = sid + '-q' + index;
+  const answered = progress.answers[qid] !== undefined;
+  const isLast = index >= assessments.length - 1;
+
+  let html = '<div class="quiz-progress-indicator">Question ' + (index + 1) + ' of ' + assessments.length + '</div>';
+
+  if (q.type === 'multiple-choice') {
+    html += renderMC(q, qid, answered);
+  } else if (q.type === 'code-completion') {
+    html += renderCode(q, qid, answered);
+  }
+
+  // Show "Next Question" button after answering (unless it's the last one)
+  if (answered && !isLast) {
+    html += '<button class="quiz-next-btn" onclick="nextQuestion()">Next Question &rarr;</button>';
+  } else if (answered && isLast) {
+    html += '<div style="text-align:center;padding:12px;color:var(--text-dim);font-size:0.85rem;">All questions answered for this section!</div>';
+  }
+
+  container.innerHTML = html;
   updateScore();
+}
+
+function nextQuestion() {
+  if (quizState.index < quizState.assessments.length - 1) {
+    quizState.index++;
+    showQuestion(document.getElementById('quiz-container'));
+  }
 }
 
 function renderMC(q, qid, answered) {
@@ -619,21 +673,20 @@ function renderMC(q, qid, answered) {
       return '<button class="' + cls + '" ' + (answered ? 'disabled' : '') +
         ' onclick="answerMC(\'' + qid + '\',' + i + ',' + q.correct + ')">' + opt + '</button>';
     }).join('') +
-    '<div class="quiz-explanation' + (answered ? ' visible' : '') + '">' + q.explanation + '</div></div>';
+    '<div class="quiz-explanation' + (answered ? ' visible' : '') + '">' + (q.explanation || '') + '</div></div>';
 }
 
 function renderCode(q, qid, answered) {
-  return '<div class="quiz-card"><div class="quiz-question">' + q.prompt + '</div>' +
+  return '<div class="quiz-card"><div class="quiz-question">' + (q.prompt || q.question || '') + '</div>' +
     '<textarea style="width:100%;font-family:var(--font-mono);font-size:0.82rem;background:var(--bg-code);color:var(--text-code);border:1px solid var(--border);border-radius:8px;padding:10px;resize:vertical;" rows="4"' +
-    (answered ? ' disabled' : '') + '>' + (answered ? q.solution : q.starterCode) + '</textarea></div>';
+    (answered ? ' disabled' : '') + '>' + (answered ? q.solution : (q.starterCode || '')) + '</textarea></div>';
 }
 
 function answerMC(qid, idx, correct) {
   progress.answers[qid] = idx;
   if (idx === correct) progress.score++;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  const sid = document.querySelector('.lecturer-nav li.active')?.dataset.section;
-  if (sid) { const sec = COURSE_DATA.sections.find(s => s.id === sid); if (sec) renderQuiz(sec.assessments, sid); }
+  showQuestion(document.getElementById('quiz-container'));
 }
 
 function updateScore() {
