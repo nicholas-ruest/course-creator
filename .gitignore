@@ -4,3 +4,6 @@ courses/
 .env
 course-skill.zip
 course/
+.claude/
+.claude-flow/
+.mcp.json
