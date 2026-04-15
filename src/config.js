@@ -9,7 +9,7 @@
 export const DEFAULTS = {
   heygen: {
     avatar_id: 'Daisy-inskirt-20220818',
-    voice_id: 'en-US-JennyNeural',
+    voice_id: 'f8c69e517f424cafaecde32dde57096b',
     background_color: '#FAF9F6',
     resolution: { width: 1920, height: 1080 },
     max_script_words: 400,

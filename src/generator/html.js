@@ -73,7 +73,7 @@ export async function generateHTML(unifiedOutline, options, config) {
   html = html.replace('</script>', generateActivityJS() + '\n</script>');
 
   // 6c. Video player injection (conditional on hasVideo)
-  const hasVideo = !options.noVideo && courseData.meta.hasVideo;
+  const hasVideo = !options.noVideo;
 
   if (hasVideo) {
     // Replace the avatar/name/role block with the video player
@@ -98,6 +98,12 @@ export async function generateHTML(unifiedOutline, options, config) {
     html = html.replace(
       /function activateSection\(sid\) \{/,
       'function activateSection(sid) {\n  loadSectionVideo(sid);',
+    );
+
+    // Remove the lecturer-dialogue update (element no longer exists in video mode)
+    html = html.replace(
+      /document\.getElementById\('lecturer-dialogue'\)\.innerHTML = section\.lectureScript;/,
+      '// lecturer-dialogue replaced by video transcript (see loadSectionVideo)',
     );
   }
 

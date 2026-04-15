@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'dotenv/config';
 
 /**
  * cli.js — Entry point for the course-creator CLI.
@@ -36,6 +37,8 @@ Options:
   --deep            Deep dive: 8-12 sections, advanced content
   --quick           Quick overview: 3-5 sections, lighter content
   --audience <lvl>  beginner | intermediate | advanced (default: auto)
+  --export-bundle <path>  Export ingested ContentBundle as JSON (Phase 1 only)
+  --from-outline <path>   Import a pre-generated outline JSON (skip Phases 2-4)
   --help            Show this help message
 `.trim();
 
@@ -94,6 +97,22 @@ function parseArgs(argv) {
         options.audience = args[i];
         if (!['beginner', 'intermediate', 'advanced'].includes(options.audience)) {
           console.error('Error: --audience must be beginner, intermediate, or advanced');
+          process.exit(1);
+        }
+        break;
+      case '--export-bundle':
+        i++;
+        options.exportBundle = args[i];
+        if (!options.exportBundle) {
+          console.error('Error: --export-bundle requires a file path');
+          process.exit(1);
+        }
+        break;
+      case '--from-outline':
+        i++;
+        options.fromOutline = args[i];
+        if (!options.fromOutline) {
+          console.error('Error: --from-outline requires a file path');
           process.exit(1);
         }
         break;

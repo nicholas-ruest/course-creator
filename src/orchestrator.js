@@ -30,19 +30,38 @@ import { awaitAllVideos } from './video/poller.js';
  * @returns {Promise<object>} result with htmlPath, manifestPath, courseDir
  */
 export async function generateCourse(source, options, config) {
-  // ── Phase 1: Ingestion ────────────────────────────────────────────────
-  console.log('Phase 1: Ingesting source...');
-  const content = await ingest(source, config);
+  let outline;
 
-  // ── Phase 2: Brief Assembly ───────────────────────────────────────────
-  console.log('Phase 2: Assembling brief...');
-  const brief = assembleBrief(content, options);
+  // ── Fast path: import pre-generated outline ───────────────────────────
+  if (options.fromOutline) {
+    console.log(`Importing outline from ${options.fromOutline}...`);
+    const raw = fs.readFileSync(path.resolve(options.fromOutline), 'utf-8');
+    outline = JSON.parse(raw);
+    console.log(`  Loaded: ${outline.title} (${outline.sections.length} sections)`);
+  } else {
+    // ── Phase 1: Ingestion ──────────────────────────────────────────────
+    console.log('Phase 1: Ingesting source...');
+    const content = await ingest(source, config);
 
-  // ── Phases 3-4: Synthesis ─────────────────────────────────────────────
-  // In standalone CLI mode, we synthesize directly from the ContentBundle.
-  // In agent mode, the 7 agent prompts in src/agents/ would be used.
-  console.log('Phases 3-4: Synthesizing course outline...');
-  const outline = synthesizeOutline(content, brief, options, config);
+    // ── Export bundle if requested ──────────────────────────────────────
+    if (options.exportBundle) {
+      const bundlePath = path.resolve(options.exportBundle);
+      fs.mkdirSync(path.dirname(bundlePath), { recursive: true });
+      fs.writeFileSync(bundlePath, JSON.stringify(content, null, 2));
+      console.log(`\nContentBundle exported to: ${bundlePath}`);
+      console.log('Use this with Claude Code agents to generate a real course outline,');
+      console.log('then run again with --from-outline <outline.json> to build the course.');
+      return { bundlePath };
+    }
+
+    // ── Phase 2: Brief Assembly ─────────────────────────────────────────
+    console.log('Phase 2: Assembling brief...');
+    const brief = assembleBrief(content, options);
+
+    // ── Phases 3-4: Synthesis ───────────────────────────────────────────
+    console.log('Phases 3-4: Synthesizing course outline...');
+    outline = synthesizeOutline(content, brief, options, config);
+  }
 
   // ── Determine video mode ──────────────────────────────────────────────
   let useVideo = !options.noVideo;
@@ -76,16 +95,19 @@ export async function generateCourse(source, options, config) {
   // The validator runs as a separate CJS script; we skip it here and
   // recommend running it manually: node src/validation/validate-course.cjs
 
-  // ── Phase 8: Video Collection ─────────────────────────────────────────
+  // ── Phase 8: Video Collection & Embedding ─────────────────────────────
   let videoManifest = null;
   let finalHtml = rawHtml;
 
-  if (useVideo && videoJobs.some(j => j.status === 'processing')) {
-    console.log('Phase 8: Waiting for HeyGen videos...');
-    const outputDir = path.resolve(config.output.dir, outline.slug, 'videos');
-    const cache = new VideoCache();
-    const client = new HeyGenClient(config.heygen_api_key, config.heygen, cache);
-    videoJobs = await awaitAllVideos(videoJobs, client, config, outputDir);
+  if (useVideo && videoJobs.length > 0) {
+    // Poll for any still-processing jobs
+    if (videoJobs.some(j => j.status === 'processing')) {
+      console.log('Phase 8: Waiting for HeyGen videos...');
+      const outputDir = path.resolve(config.output.dir, outline.slug, 'videos');
+      const cache = new VideoCache();
+      const client = new HeyGenClient(config.heygen_api_key, config.heygen, cache);
+      videoJobs = await awaitAllVideos(videoJobs, client, config, outputDir);
+    }
 
     videoManifest = {
       avatar_id: config.heygen.avatar_id,
@@ -101,14 +123,39 @@ export async function generateCourse(source, options, config) {
       })),
     };
 
-    for (const job of videoJobs) {
-      if (job.status === 'completed' && job.local_path) {
-        const videoRelPath = `videos/${job.section_id}.mp4`;
-        finalHtml = finalHtml.replace(
-          new RegExp(`("id":\\s*"${job.section_id}"[^}]*"videoUrl":\\s*)null`, 's'),
-          `$1"${videoRelPath}"`,
+    // Embed completed videos as base64 data URIs directly into COURSE_DATA
+    console.log('Phase 8b: Embedding videos into HTML...');
+
+    // Extract COURSE_DATA JSON from the HTML, update it, and re-inject
+    const cdMatch = finalHtml.match(/const COURSE_DATA = ({[\s\S]*?});\n/);
+    if (cdMatch) {
+      const courseDataObj = JSON.parse(cdMatch[1]);
+
+      for (const job of videoJobs) {
+        if (job.status === 'completed' && job.local_path && fs.existsSync(job.local_path)) {
+          const videoBytes = fs.readFileSync(job.local_path);
+          const base64 = videoBytes.toString('base64');
+          const dataUri = `data:video/mp4;base64,${base64}`;
+
+          const section = courseDataObj.sections.find(s => s.id === job.section_id);
+          if (section) {
+            section.videoUrl = dataUri;
+            if (job.duration) section.videoDuration = job.duration;
+          }
+          console.log(`  Embedded video for ${job.section_id} (${Math.round(videoBytes.length / 1024)}KB)`);
+        }
+      }
+
+      // Update hasVideo and totalVideoDuration
+      const completedCount = courseDataObj.sections.filter(s => s.videoUrl).length;
+      if (completedCount > 0) {
+        courseDataObj.meta.hasVideo = true;
+        courseDataObj.meta.totalVideoDuration = courseDataObj.sections.reduce(
+          (sum, s) => sum + (s.videoDuration || 0), 0,
         );
       }
+
+      finalHtml = finalHtml.replace(cdMatch[0], `const COURSE_DATA = ${JSON.stringify(courseDataObj, null, 2)};\n`);
     }
   }
 

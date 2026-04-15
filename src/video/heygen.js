@@ -92,7 +92,8 @@ export class HeyGenClient {
 
     if (!response.ok) {
       const body = await response.text().catch(() => '');
-      console.warn(`HeyGen submission failed for ${sectionId}: ${response.status} ${body}`);
+      console.warn(`HeyGen submission failed for ${sectionId}: ${response.status}`);
+      console.warn(`  Response: ${body}`);
       return {
         video_id: null,
         status: 'failed',
@@ -103,6 +104,7 @@ export class HeyGenClient {
     }
 
     const data = await response.json();
+    if (process.env.DEBUG) console.log(`HeyGen submit response for ${sectionId}:`, JSON.stringify(data));
     return {
       video_id: data.data?.video_id || null,
       status: 'processing',
@@ -131,11 +133,13 @@ export class HeyGenClient {
     }
 
     const data = await response.json();
+    if (process.env.DEBUG) console.log(`HeyGen poll response for ${videoId}:`, JSON.stringify(data));
     return {
       status: data.data?.status || 'unknown',
       video_url: data.data?.video_url || null,
       thumbnail_url: data.data?.thumbnail_url || null,
       duration: data.data?.duration || null,
+      error: data.data?.error || data.message || null,
     };
   }
 

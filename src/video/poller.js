@@ -64,8 +64,24 @@ export async function awaitAllVideos(jobs, client, config, outputDir) {
           console.log(`Video completed for ${job.section_id} (${status.duration}s)`);
         } else if (status.status === 'failed' || status.status === 'error') {
           job.status = 'failed';
-          job.error = status.error || 'HeyGen reported failure';
+          const rawError = status.error;
+          job.error = typeof rawError === 'object' && rawError !== null
+            ? (rawError.message || rawError.detail || JSON.stringify(rawError))
+            : (rawError || 'HeyGen reported failure');
           console.warn(`Video failed for ${job.section_id}: ${job.error}`);
+
+          // Abort all remaining jobs on account-level errors (e.g. insufficient credits)
+          const errorCode = typeof rawError === 'object' && rawError?.code;
+          if (errorCode === 'MOVIO_PAYMENT_INSUFFICIENT_CREDIT') {
+            console.warn('Account has insufficient HeyGen credits — aborting remaining video jobs');
+            for (const j of jobs) {
+              if (j.status === 'processing') {
+                j.status = 'failed';
+                j.error = 'Aborted: insufficient HeyGen credits';
+              }
+            }
+            return jobs;
+          }
         }
         // else still processing — continue polling
       } catch (err) {

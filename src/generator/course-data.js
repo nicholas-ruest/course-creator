@@ -73,7 +73,7 @@ export function buildCourseData(outline, options) {
       estimatedDuration,
       totalActivities,
       totalVideoDuration,
-      hasVideo: !options.noVideo && totalVideoDuration > 0,
+      hasVideo: !options.noVideo,
       version: '2.0.0',
       generator: 'course-creator/1.0.0',
       instructor: {

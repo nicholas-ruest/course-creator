@@ -16,5 +16,8 @@
   "license": "MIT",
   "devDependencies": {
     "vitest": "^4.1.4"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
